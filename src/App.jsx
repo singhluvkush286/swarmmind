@@ -48,9 +48,10 @@ const CSS = `
     padding: 6px 12px; border-radius: 20px;
     font-family: var(--font-mono); font-size: 11px;
   }
-  .badge-blue { background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); color: var(--accent); }
-  .badge-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: var(--accent3); }
-  .badge-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: var(--danger); }
+  .badge-blue  { background: rgba(0,229,255,0.08);   border: 1px solid rgba(0,229,255,0.2);   color: var(--accent); }
+  .badge-green { background: rgba(16,185,129,0.08);  border: 1px solid rgba(16,185,129,0.2);  color: var(--accent3); }
+  .badge-purple{ background: rgba(124,58,237,0.08);  border: 1px solid rgba(124,58,237,0.25); color: #a78bfa; }
+  .badge-red   { background: rgba(239,68,68,0.08);   border: 1px solid rgba(239,68,68,0.2);   color: var(--danger); }
   .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent3); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
@@ -59,10 +60,12 @@ const CSS = `
     padding: 12px 18px; border-radius: 10px;
     font-family: var(--font-mono); font-size: 12px;
     margin-bottom: 16px; line-height: 1.6;
+    display: flex; align-items: flex-start; gap: 10px;
   }
-  .banner-error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: var(--danger); }
-  .banner-warn  { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); color: var(--warn); }
-  .banner-ok    { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); color: var(--accent3); }
+  .banner-error  { background: rgba(239,68,68,0.08);   border: 1px solid rgba(239,68,68,0.25);   color: var(--danger); }
+  .banner-warn   { background: rgba(245,158,11,0.08);  border: 1px solid rgba(245,158,11,0.25);  color: var(--warn); }
+  .banner-ok     { background: rgba(16,185,129,0.08);  border: 1px solid rgba(16,185,129,0.25);  color: var(--accent3); }
+  .banner-purple { background: rgba(124,58,237,0.08);  border: 1px solid rgba(124,58,237,0.25);  color: #a78bfa; }
 
   /* Layout */
   .grid-main { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
@@ -95,12 +98,13 @@ const CSS = `
   .mission-ta:disabled { opacity: 0.5; }
   .launch-btn {
     padding: 14px 28px;
-    background: linear-gradient(135deg, var(--accent), #0099cc);
-    color: #040810; font-family: var(--font-sans); font-weight: 700;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff; font-family: var(--font-sans); font-weight: 700;
     font-size: 14px; border: none; border-radius: 8px; cursor: pointer;
     transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s; white-space: nowrap;
+    box-shadow: 0 0 20px rgba(124,58,237,0.3);
   }
-  .launch-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--glow); }
+  .launch-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 0 30px rgba(124,58,237,0.5); }
   .launch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   .chip {
@@ -110,6 +114,17 @@ const CSS = `
     transition: background 0.15s, border-color 0.15s;
   }
   .chip:hover { background: rgba(124,58,237,0.2); border-color: rgba(124,58,237,0.5); }
+
+  /* Model selector */
+  .model-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .model-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .model-chip {
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-family: var(--font-mono);
+    cursor: pointer; transition: all 0.15s; border: 1px solid transparent;
+  }
+  .model-chip.selected { background: rgba(124,58,237,0.2); border-color: rgba(124,58,237,0.5); color: #a78bfa; }
+  .model-chip.unselected { background: rgba(13,32,64,0.5); border-color: var(--border); color: var(--muted); }
+  .model-chip:hover { border-color: rgba(124,58,237,0.4); color: #a78bfa; }
 
   /* Swarm */
   .swarm-panel { min-height: 460px; }
@@ -121,6 +136,7 @@ const CSS = `
   }
   .orch-label { font-family: var(--font-mono); font-size: 10px; color: #a78bfa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
   .orch-msg { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .orch-meta { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
 
   .agent-card {
     background: rgba(4,8,16,0.7); border: 1px solid var(--border);
@@ -146,12 +162,13 @@ const CSS = `
   }
   .agent-name { font-weight: 700; font-size: 13px; }
   .agent-role { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+  .agent-model { font-family: var(--font-mono); font-size: 9px; color: #a78bfa; margin-top: 1px; }
   .agent-sbadge {
     margin-left: auto; padding: 2px 8px; border-radius: 10px;
     font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
   }
   .sb-idle    { background: rgba(100,116,139,0.15); color: var(--muted); }
-  .sb-working { background: rgba(0,229,255,0.12);   color: var(--accent); }
+  .sb-working { background: rgba(124,58,237,0.15);  color: #a78bfa; }
   .sb-done    { background: rgba(16,185,129,0.12);  color: var(--accent3); }
   .sb-error   { background: rgba(239,68,68,0.12);   color: var(--danger); }
 
@@ -160,7 +177,7 @@ const CSS = `
   .agent-task.ok   { color: var(--accent3); }
   .think span {
     display: inline-block; width: 4px; height: 4px; border-radius: 50%;
-    background: var(--accent); margin: 0 2px; animation: blink 1.2s infinite;
+    background: #a78bfa; margin: 0 2px; animation: blink 1.2s infinite;
   }
   .think span:nth-child(2){ animation-delay:.2s } .think span:nth-child(3){ animation-delay:.4s }
   @keyframes blink { 0%,100%{opacity:0.2} 50%{opacity:1} }
@@ -168,7 +185,7 @@ const CSS = `
   .agent-prog { height: 2px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
   .agent-prog-fill {
     height: 100%; border-radius: 2px; transition: width 0.5s ease;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
   }
 
   /* Log */
@@ -189,6 +206,7 @@ const CSS = `
   .lm.success { color: var(--accent3); }
   .lm.error   { color: var(--danger); }
   .lm.orch    { color: #a78bfa; }
+  .lm.copilot { color: #60a5fa; }
 
   /* Result */
   .result-panel { grid-column: 1 / -1; }
@@ -218,7 +236,7 @@ const CSS = `
     border-radius: 8px; cursor: pointer; font-family: var(--font-sans);
     font-size: 13px; font-weight: 600; transition: border-color 0.2s, color 0.2s;
   }
-  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .reset-btn:hover { border-color: var(--accent2); color: #a78bfa; }
 
   @media(max-width:900px){
     .grid-main { grid-template-columns: 1fr; }
@@ -227,14 +245,17 @@ const CSS = `
   }
 `;
 
+// ── Agent definitions — each gets its own Copilot model ──────────────────────
 const AGENTS = [
-  { id:"planner",     name:"Planner",     icon:"🗺️", role:"Task Decomposition", color:"#00e5ff" },
-  { id:"researcher",  name:"Researcher",  icon:"🔍", role:"Knowledge Retrieval", color:"#7c3aed" },
-  { id:"analyst",     name:"Analyst",     icon:"📊", role:"Data Analysis",       color:"#f59e0b" },
-  { id:"coder",       name:"Coder",       icon:"💻", role:"Code Generation",     color:"#10b981" },
-  { id:"critic",      name:"Critic",      icon:"🔬", role:"Quality Validation",  color:"#ef4444" },
-  { id:"synthesizer", name:"Synthesizer", icon:"⚡", role:"Output Synthesis",    color:"#a78bfa" },
+  { id:"planner",     name:"Planner",     icon:"🗺️", role:"Task Decomposition", color:"#00e5ff", model:"gpt-4o" },
+  { id:"researcher",  name:"Researcher",  icon:"🔍", role:"Knowledge Retrieval", color:"#7c3aed", model:"gpt-4o" },
+  { id:"analyst",     name:"Analyst",     icon:"📊", role:"Data Analysis",       color:"#f59e0b", model:"o3-mini" },
+  { id:"coder",       name:"Coder",       icon:"💻", role:"Code Generation",     color:"#10b981", model:"gpt-4o" },
+  { id:"critic",      name:"Critic",      icon:"🔬", role:"Quality Validation",  color:"#ef4444", model:"claude-sonnet-4-5" },
+  { id:"synthesizer", name:"Synthesizer", icon:"⚡", role:"Output Synthesis",    color:"#a78bfa", model:"gpt-4o" },
 ];
+
+const AVAILABLE_MODELS = ["gpt-4o", "o3-mini", "claude-sonnet-4-5", "gpt-4o-mini"];
 
 const PRESETS = [
   "Build a real-time fraud detection system for financial transactions",
@@ -243,12 +264,13 @@ const PRESETS = [
   "Architect a self-healing microservices monitoring platform",
 ];
 
-// ── API — calls local proxy (Gemini free tier) ────────────────────────────────
-async function callAI(system, user, maxTokens = 600) {
+// ── API — calls local proxy (GitHub Copilot) ──────────────────────────────────
+async function callAI(system, user, maxTokens = 600, model = "gpt-4o") {
   const res = await fetch("http://localhost:3001/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      model,
       system,
       messages: [{ role: "user", content: user }],
       max_tokens: maxTokens,
@@ -266,21 +288,28 @@ async function callAI(system, user, maxTokens = 600) {
 }
 
 export default function SwarmMind() {
-  const [mission,   setMission]   = useState("");
-  const [running,   setRunning]   = useState(false);
-  const [agents,    setAgents]    = useState(() => AGENTS.map(a => ({ ...a, status:"idle", task:"", progress:0 })));
-  const [logs,      setLogs]      = useState([]);
-  const [orchMsg,   setOrchMsg]   = useState("Awaiting mission directive...");
-  const [result,    setResult]    = useState(null);
-  const [startTime, setStartTime] = useState(null);
-  const [proxyStatus, setProxyStatus] = useState("checking"); // checking | ok | error
+  const [mission,      setMission]      = useState("");
+  const [running,      setRunning]      = useState(false);
+  const [agents,       setAgents]       = useState(() => AGENTS.map(a => ({ ...a, status:"idle", task:"", progress:0 })));
+  const [logs,         setLogs]         = useState([]);
+  const [orchMsg,      setOrchMsg]      = useState("Awaiting mission directive...");
+  const [result,       setResult]       = useState(null);
+  const [startTime,    setStartTime]    = useState(null);
+  const [orchModel,    setOrchModel]    = useState("gpt-4o");
+  const [proxyStatus,  setProxyStatus]  = useState("checking"); // checking | ok | nokey | error | noauth
+  const [proxyInfo,    setProxyInfo]    = useState(null);
   const logRef = useRef(null);
 
-  // Check proxy on mount
+  // ── Check proxy on mount ──────────────────────────────────────────────────
   useEffect(() => {
     fetch("http://localhost:3001/health")
       .then(r => r.json())
-      .then(d => setProxyStatus(d.key_loaded ? "ok" : "nokey"))
+      .then(d => {
+        setProxyInfo(d);
+        if (d.key_loaded === false) setProxyStatus("noauth");
+        else if (d.status === "ok") setProxyStatus("ok");
+        else setProxyStatus("error");
+      })
       .catch(() => setProxyStatus("error"));
   }, []);
 
@@ -301,7 +330,9 @@ export default function SwarmMind() {
   }, [logs]);
 
   const colorOf = id => AGENTS.find(a => a.id === id)?.color || "#00e5ff";
+  const modelOf  = id => AGENTS.find(a => a.id === id)?.model || "gpt-4o";
 
+  // ── Main swarm runner ─────────────────────────────────────────────────────
   async function runSwarm() {
     if (!mission.trim() || running) return;
     setRunning(true); setResult(null); setLogs([]);
@@ -309,100 +340,111 @@ export default function SwarmMind() {
     AGENTS.forEach(a => patchAgent(a.id, { status:"idle", task:"", progress:0 }));
 
     try {
-      // ── Orchestrator: decompose mission ──────────────────────────────────
-      setOrchMsg("🧠 Orchestrator decomposing mission...");
-      addLog("orchestrator", `Mission received: "${mission.slice(0,60)}..."`, "orch");
+      // Orchestrator decomposes
+      setOrchMsg("🧠 Orchestrator decomposing mission via GitHub Copilot...");
+      addLog("orchestrator", `Mission: "${mission.slice(0,60)}..."`, "orch");
+      addLog("orchestrator", `Using model: ${orchModel} via GitHub Copilot API`, "copilot");
 
       const planRaw = await callAI(
-        `You are an AI Orchestrator. Decompose the mission into 6 sub-tasks.
+        `You are an AI Orchestrator powered by GitHub Copilot. Decompose the mission into 6 sub-tasks.
 Respond ONLY with valid JSON, no markdown:
 {"planner":"...","researcher":"...","analyst":"...","coder":"...","critic":"...","synthesizer":"..."}
-Each value is ONE specific sentence for that agent.`,
-        `Mission: ${mission}`
+Each value is ONE specific, actionable sentence for that specialist agent.`,
+        `Mission: ${mission}`,
+        600,
+        orchModel
       );
 
       let plan;
       try {
-        plan = JSON.parse(planRaw.replace(/```json|```/g,"").trim());
+        plan = JSON.parse(planRaw.replace(/```json|```/g, "").trim());
       } catch {
         plan = {
-          planner:"Break down requirements into milestones",
-          researcher:"Survey best practices and prior art",
-          analyst:"Analyze data flows and bottlenecks",
-          coder:"Prototype core architecture",
-          critic:"Identify risks and vulnerabilities",
-          synthesizer:"Compile findings into proposal",
+          planner:     "Break down requirements into concrete milestones",
+          researcher:  "Survey best practices and prior art in the domain",
+          analyst:     "Analyze data flows, bottlenecks and performance tradeoffs",
+          coder:       "Prototype core architecture with working code snippets",
+          critic:      "Identify risks, security gaps and failure modes",
+          synthesizer: "Compile all findings into an actionable proposal",
         };
       }
 
-      addLog("orchestrator", "Task graph ready. Dispatching 6 agents in parallel.", "orch");
-      setOrchMsg("⚡ 6 agents running in parallel...");
+      addLog("orchestrator", `Task graph ready. Dispatching 6 agents via GitHub Copilot...`, "orch");
+      setOrchMsg("⚡ 6 agents running in parallel via GitHub Copilot...");
 
       AGENTS.forEach(a => {
         patchAgent(a.id, { status:"active", task: plan[a.id] || "Processing...", progress:5 });
-        addLog(a.id, plan[a.id] || "Starting...", "info");
+        addLog(a.id, `[${a.model}] ${plan[a.id] || "Starting..."}`, "info");
       });
 
       // Tick progress bars while agents run
       const ticks = [20, 45, 70, 90];
       for (const tick of ticks) {
         await new Promise(r => setTimeout(r, 700));
-        AGENTS.forEach(a => patchAgent(a.id, { progress: tick }));
+        AGENTS.forEach(a => {
+          if (a.status === "active") patchAgent(a.id, { progress: tick });
+        });
       }
 
-      // ── All 6 agents run in parallel ─────────────────────────────────────
+      // All 6 agents in parallel — each with its own model
       const agentResults = await Promise.all(
         AGENTS.map(async (ag) => {
           const task = plan[ag.id] || "Analyse the mission";
+          addLog(ag.id, `Calling Copilot model: ${ag.model}`, "copilot");
           const output = await callAI(
-            `You are ${ag.name}, a specialist AI agent. Role: ${ag.role}.
-Be concise, technical, and specific. Respond in 3-5 sentences with actionable insights.`,
-            `Mission: ${mission}\nYour task: ${task}`
+            `You are ${ag.name}, a specialist AI agent powered by GitHub Copilot. Role: ${ag.role}.
+Be concise, technical, and specific. Respond in 3-5 sentences with actionable insights.
+Focus on: ${ag.role.toLowerCase()} aspects of the problem.`,
+            `Mission: ${mission}\nYour task: ${task}`,
+            700,
+            ag.model
           );
           patchAgent(ag.id, { status:"done", progress:100 });
-          addLog(ag.id, output.slice(0,120) + (output.length > 120 ? "..." : ""), "success");
-          return { agent: ag.id, role: ag.role, task, output };
+          addLog(ag.id, output.slice(0, 120) + (output.length > 120 ? "..." : ""), "success");
+          return { agent: ag.id, role: ag.role, task, output, model: ag.model };
         })
       );
 
       setOrchMsg("✅ All agents done. Synthesizing final report...");
-      addLog("orchestrator", "Synthesizing all outputs...", "orch");
+      addLog("orchestrator", "Synthesizing all Copilot agent outputs...", "orch");
 
-      // ── Final synthesis ───────────────────────────────────────────────────
-      const combined = agentResults.map(r => `${r.role}: ${r.output}`).join("\n\n");
+      // Final synthesis
+      const combined = agentResults.map(r => `[${r.model}] ${r.role}: ${r.output}`).join("\n\n");
       const synthRaw = await callAI(
-        `You are the final Synthesizer. Produce a structured report for a Microsoft hackathon judge.
+        `You are the final Synthesizer. Produce a structured report for a Microsoft Build AI hackathon judge.
 Respond ONLY with valid JSON, no markdown:
 {
   "solution_title":"...",
   "executive_summary":"2-3 sentences",
   "key_innovations":["...","...","..."],
-  "tech_stack":["...","...","...","..."],
-  "impact":"1-2 sentences",
-  "ms_alignment":"1 sentence on Microsoft Azure AI alignment"
+  "tech_stack":["GitHub Copilot API","Azure AI Foundry","...","..."],
+  "impact":"1-2 sentences on real-world impact",
+  "ms_alignment":"1 sentence on Microsoft GitHub Copilot + Azure AI alignment"
 }`,
         `Mission: ${mission}\n\nAgent outputs:\n${combined}`,
-        800
+        900,
+        orchModel
       );
 
       let synth;
       try {
-        synth = JSON.parse(synthRaw.replace(/```json|```/g,"").trim());
+        synth = JSON.parse(synthRaw.replace(/```json|```/g, "").trim());
       } catch {
         synth = {
-          solution_title:"AI Agent Swarm Solution",
-          executive_summary: synthRaw.slice(0,200),
-          key_innovations:["Parallel agent execution","Multi-agent coordination","Automated synthesis"],
-          tech_stack:["Azure OpenAI","Semantic Kernel","Azure Container Apps","React"],
-          impact:"Reduces complex planning from hours to under 60 seconds.",
-          ms_alignment:"Built on Azure AI Foundry and Semantic Kernel orchestration.",
+          solution_title:    "AI Agent Swarm Solution",
+          executive_summary: synthRaw.slice(0, 200),
+          key_innovations:   ["Parallel Copilot agent execution", "Multi-model orchestration", "Automated synthesis"],
+          tech_stack:        ["GitHub Copilot API", "Azure AI Foundry", "Semantic Kernel", "Azure Container Apps"],
+          impact:            "Reduces complex planning from hours to under 60 seconds.",
+          ms_alignment:      "Powered by GitHub Copilot API with gpt-4o, o3-mini, and claude-sonnet-4-5 models via Microsoft's AI ecosystem.",
         };
       }
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      setResult({ ...synth, agentResults, elapsed, agentCount: AGENTS.length });
-      setOrchMsg(`🎯 Mission complete in ${elapsed}s — ${AGENTS.length} agents coordinated.`);
-      addLog("orchestrator", `Done in ${elapsed}s. Report ready.`, "success");
+      const modelsUsed = [...new Set(AGENTS.map(a => a.model))];
+      setResult({ ...synth, agentResults, elapsed, agentCount: AGENTS.length, modelsUsed });
+      setOrchMsg(`🎯 Mission complete in ${elapsed}s — ${AGENTS.length} Copilot agents coordinated.`);
+      addLog("orchestrator", `Done in ${elapsed}s using ${modelsUsed.length} Copilot models.`, "success");
 
     } catch (err) {
       setOrchMsg(`❌ Error: ${err.message}`);
@@ -419,45 +461,63 @@ Respond ONLY with valid JSON, no markdown:
     AGENTS.forEach(a => patchAgent(a.id, { status:"idle", task:"", progress:0 }));
   }
 
-  // Proxy status banner
+  // ── Proxy status banner ───────────────────────────────────────────────────
   const Banner = () => {
     if (proxyStatus === "checking") return (
-      <div className="banner banner-warn">⟳ Checking proxy server on port 3001...</div>
+      <div className="banner banner-warn">⟳ Checking GitHub Copilot proxy on port 3001...</div>
     );
     if (proxyStatus === "error") return (
       <div className="banner banner-error">
-        ⚠️ Proxy not running. Open a new terminal in your swarmmind folder and run: <strong>node server.js</strong>
+        <span>⚠️</span>
+        <span>
+          Proxy not running. Open a new terminal in your swarmmind folder and run: <strong>node server.js</strong>
+          <br />Make sure you have run <strong>gh auth login</strong> first to authenticate GitHub Copilot.
+        </span>
       </div>
     );
-    if (proxyStatus === "nokey") return (
+    if (proxyStatus === "noauth") return (
       <div className="banner banner-error">
-        ⚠️ Proxy running but GEMINI_API_KEY missing. Add it to your .env file, then restart: <strong>node server.js</strong>
+        <span>⚠️</span>
+        <span>
+          GitHub CLI not authenticated. Run: <strong>gh auth login</strong> → then restart: <strong>node server.js</strong>
+          <br />You need an active GitHub Copilot subscription (Individual / Pro).
+        </span>
       </div>
     );
     return (
-      <div className="banner banner-ok">✓ Proxy connected · Gemini 1.5 Flash (free tier) · Ready to launch</div>
+      <div className="banner banner-purple">
+        <span>✓</span>
+        <span>
+          GitHub Copilot API connected · Models: gpt-4o · o3-mini · claude-sonnet-4-5 · Ready to launch
+        </span>
+      </div>
     );
   };
+
+  const isReady = proxyStatus === "ok";
 
   return (
     <>
       <style>{CSS}</style>
       <div className="app">
 
-        {/* Header */}
+        {/* ── Header ──────────────────────────────────────────────────────── */}
         <header className="header">
           <div className="logo">
             SwarmMind
-            <span>/ Microsoft Build AI 2026 — Agent Swarms</span>
+            <span>/ Microsoft Build AI 2026 — Agent Swarms · GitHub Copilot</span>
           </div>
           <div className="header-right">
-            <div className={`badge ${proxyStatus === "ok" ? "badge-green" : "badge-red"}`}>
-              <span className="pulse" style={{ background: proxyStatus === "ok" ? "#10b981" : "#ef4444" }} />
-              {proxyStatus === "ok" ? "GEMINI FREE · LIVE" : "PROXY OFFLINE"}
+            <div className={`badge ${isReady ? "badge-purple" : "badge-red"}`}>
+              <span className="pulse" style={{ background: isReady ? "#a78bfa" : "#ef4444" }} />
+              {isReady ? "COPILOT · LIVE" : "PROXY OFFLINE"}
             </div>
             <div className="badge badge-blue">
               <span className="pulse" />
               {AGENTS.length} AGENTS
+            </div>
+            <div className="badge badge-green">
+              3 MODELS
             </div>
             {result && <button className="reset-btn" onClick={reset}>↺ Reset</button>}
           </div>
@@ -467,18 +527,18 @@ Respond ONLY with valid JSON, no markdown:
 
         <div className="grid-main">
 
-          {/* Mission */}
+          {/* ── Mission Control ─────────────────────────────────────────────── */}
           <div className="panel mission-panel">
             <div className="panel-header">
               <span>Mission Control</span>
-              <span className="dot" style={{ background:"#00e5ff" }} />
+              <span className="dot" style={{ background:"#a78bfa" }} />
             </div>
             <div className="mission-inner">
               <div className="mission-label">▸ Enter mission directive</div>
               <div className="mission-row">
                 <textarea
                   className="mission-ta"
-                  placeholder="Describe a complex real-world problem for the swarm to solve..."
+                  placeholder="Describe a complex real-world problem for the GitHub Copilot agent swarm to solve..."
                   value={mission}
                   onChange={e => setMission(e.target.value)}
                   disabled={running}
@@ -487,31 +547,48 @@ Respond ONLY with valid JSON, no markdown:
                 <button
                   className="launch-btn"
                   onClick={runSwarm}
-                  disabled={!mission.trim() || running || proxyStatus !== "ok"}
+                  disabled={!mission.trim() || running || !isReady}
                 >
                   {running ? "⟳ Running..." : "⚡ Launch Swarm"}
                 </button>
               </div>
+
+              {/* Orchestrator model picker */}
+              <div className="model-row">
+                <span className="model-label">Orchestrator model:</span>
+                {AVAILABLE_MODELS.map(m => (
+                  <button
+                    key={m}
+                    className={`model-chip ${orchModel === m ? "selected" : "unselected"}`}
+                    onClick={() => !running && setOrchModel(m)}
+                    disabled={running}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+
               <div className="presets">
                 {PRESETS.map(p => (
                   <button key={p} className="chip" onClick={() => setMission(p)} disabled={running}>
-                    {p.slice(0,46)}…
+                    {p.slice(0, 46)}…
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Swarm */}
+          {/* ── Agent Swarm ──────────────────────────────────────────────────── */}
           <div className="panel swarm-panel">
             <div className="panel-header">
-              <span>Agent Swarm</span>
-              <span className="dot" style={{ background: running ? "#00e5ff" : "#334155" }} />
+              <span>GitHub Copilot Agent Swarm</span>
+              <span className="dot" style={{ background: running ? "#a78bfa" : "#334155" }} />
             </div>
             <div className="swarm-canvas">
               <div className="orch-box">
-                <div className="orch-label">⬡ Orchestrator</div>
+                <div className="orch-label">⬡ Orchestrator · GitHub Copilot</div>
                 <div className="orch-msg">{orchMsg}</div>
+                <div className="orch-meta">Model: {orchModel} · Endpoint: api.githubcopilot.com</div>
               </div>
               <div className="agents-grid">
                 {agents.map(ag => (
@@ -525,6 +602,7 @@ Respond ONLY with valid JSON, no markdown:
                       <div>
                         <div className="agent-name">{ag.name}</div>
                         <div className="agent-role">{ag.role}</div>
+                        <div className="agent-model">⬡ {ag.model}</div>
                       </div>
                       <span className={`agent-sbadge sb-${ag.status === "active" ? "working" : ag.status}`}>
                         {ag.status === "active" ? "working" : ag.status}
@@ -548,7 +626,7 @@ Respond ONLY with valid JSON, no markdown:
             </div>
           </div>
 
-          {/* Log */}
+          {/* ── Live Feed ─────────────────────────────────────────────────────── */}
           <div className="panel log-panel">
             <div className="panel-header">
               <span>Live Feed</span>
@@ -556,7 +634,9 @@ Respond ONLY with valid JSON, no markdown:
             </div>
             <div className="log-body" ref={logRef}>
               {logs.length === 0 ? (
-                <div style={{ color:"var(--muted)", fontSize:12, paddingTop:8 }}>Waiting for swarm activity...</div>
+                <div style={{ color:"var(--muted)", fontSize:12, paddingTop:8 }}>
+                  Waiting for GitHub Copilot swarm activity...
+                </div>
               ) : logs.map(l => (
                 <div className="le" key={l.id}>
                   <span className="lt">{l.time}</span>
@@ -567,20 +647,22 @@ Respond ONLY with valid JSON, no markdown:
             </div>
           </div>
 
-          {/* Result */}
+          {/* ── Result Report ─────────────────────────────────────────────────── */}
           {result && (
             <div className="panel result-panel">
               <div className="panel-header">
-                <span>Swarm Report — {result.solution_title}</span>
+                <span>Copilot Swarm Report — {result.solution_title}</span>
                 <button className="reset-btn" onClick={reset} style={{ padding:"4px 12px", fontSize:11 }}>New Mission</button>
               </div>
               <div className="result-body">
+
+                {/* Stats */}
                 <div className="stats-row">
                   {[
-                    { v: result.agentCount,                  l:"Agents",     c:"var(--accent)" },
-                    { v: result.elapsed+"s",                 l:"Time",       c:"var(--accent3)" },
-                    { v: result.key_innovations?.length||3,  l:"Innovations",c:"#a78bfa" },
-                    { v: result.tech_stack?.length||4,       l:"Stack Items", c:"var(--warn)" },
+                    { v: result.agentCount,              l:"Agents",        c:"var(--accent)" },
+                    { v: result.elapsed+"s",             l:"Time",          c:"var(--accent3)" },
+                    { v: result.modelsUsed?.length || 3, l:"Copilot Models", c:"#a78bfa" },
+                    { v: result.key_innovations?.length || 3, l:"Innovations", c:"var(--warn)" },
                   ].map(s => (
                     <div className="stat-box" key={s.l}>
                       <div className="stat-val" style={{ color:s.c }}>{s.v}</div>
@@ -588,19 +670,32 @@ Respond ONLY with valid JSON, no markdown:
                     </div>
                   ))}
                 </div>
+
+                {/* Models used row */}
+                {result.modelsUsed && (
+                  <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:14, marginBottom:4 }}>
+                    <span style={{ fontFamily:"var(--font-mono)", fontSize:10, color:"var(--muted)", alignSelf:"center" }}>COPILOT MODELS USED:</span>
+                    {result.modelsUsed.map(m => (
+                      <span key={m} className="rchip rc-p" style={{ fontSize:11 }}>{m}</span>
+                    ))}
+                  </div>
+                )}
+
                 <div style={{ marginTop:20 }}>
                   {[
-                    { title:"Executive Summary",    content: <div className="result-text">{result.executive_summary}</div> },
-                    { title:"Key Innovations",      content: <div className="rchips">{(result.key_innovations||[]).map((k,i)=><span key={i} className={`rchip ${["rc-c","rc-p","rc-g"][i%3]}`}>{k}</span>)}</div> },
-                    { title:"Tech Stack",           content: <div className="rchips">{(result.tech_stack||[]).map((t,i)=><span key={i} className="rchip rc-c" style={{fontSize:12}}>{t}</span>)}</div> },
-                    { title:"Real-World Impact",    content: <div className="result-text">{result.impact}</div> },
-                    { title:"Microsoft AI Alignment",content: <div className="result-text" style={{color:"#a78bfa"}}>{result.ms_alignment}</div> },
+                    { title:"Executive Summary",       content: <div className="result-text">{result.executive_summary}</div> },
+                    { title:"Key Innovations",         content: <div className="rchips">{(result.key_innovations||[]).map((k,i)=><span key={i} className={`rchip ${["rc-c","rc-p","rc-g"][i%3]}`}>{k}</span>)}</div> },
+                    { title:"Tech Stack",              content: <div className="rchips">{(result.tech_stack||[]).map((t,i)=><span key={i} className="rchip rc-p" style={{fontSize:12}}>{t}</span>)}</div> },
+                    { title:"Real-World Impact",       content: <div className="result-text">{result.impact}</div> },
+                    { title:"Microsoft AI Alignment",  content: <div className="result-text" style={{color:"#a78bfa"}}>{result.ms_alignment}</div> },
                   ].map(s => (
                     <div className="result-sec" key={s.title}>
                       <div className="result-sec-title">{s.title}</div>
                       {s.content}
                     </div>
                   ))}
+
+                  {/* Agent contributions */}
                   <div className="result-sec">
                     <div className="result-sec-title">Agent Contributions</div>
                     <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:10 }}>
@@ -612,8 +707,11 @@ Respond ONLY with valid JSON, no markdown:
                             border:`1px solid ${colorOf(r.agent)}30`,
                             borderLeft:`3px solid ${colorOf(r.agent)}`, borderRadius:8,
                           }}>
-                            <div style={{ fontSize:12, fontWeight:700, color:colorOf(r.agent), marginBottom:4 }}>
+                            <div style={{ fontSize:12, fontWeight:700, color:colorOf(r.agent), marginBottom:2 }}>
                               {ag?.icon} {ag?.name} — {ag?.role}
+                            </div>
+                            <div style={{ fontFamily:"var(--font-mono)", fontSize:9, color:"#a78bfa", marginBottom:6 }}>
+                              ⬡ {r.model}
                             </div>
                             <div style={{ fontSize:12, color:"var(--text)", opacity:0.8, lineHeight:1.5 }}>
                               {r.output.slice(0,220)}{r.output.length>220?"…":""}

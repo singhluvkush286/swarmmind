@@ -7,34 +7,43 @@ Microsoft Build AI Hackathon 2026 — Agent Swarms Track
 
 import asyncio
 import os
+import json
+import time
 from typing import Optional
+
+from dotenv import load_dotenv          # ← NEW: load .env locally
+load_dotenv()                           # ← NEW: must be before any os.environ access
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import semantic_kernel as sk
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.contents.chat_history import ChatHistory
-import json
-import time
 
 app = FastAPI(title="SwarmMind Orchestration API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://*.azurecontainerapps.io"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://*.azurecontainerapps.io",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── Semantic Kernel setup (Azure AI Foundry / Azure OpenAI) ──────────────────
-def create_kernel():
+# ── Semantic Kernel setup ────────────────────────────────────────────────────
+def create_kernel() -> sk.Kernel:
     kernel = sk.Kernel()
     kernel.add_service(
         AzureChatCompletion(
             service_id="default",
-            deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT"],  # e.g. "gpt-4o"
+            deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT"],
             endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
             api_key=os.environ["AZURE_OPENAI_API_KEY"],
+            api_version=os.environ["AZURE_OPENAI_API_VERSION"],  # ← NEW: required
         )
     )
     return kernel
@@ -204,9 +213,18 @@ async def orchestrate_swarm(mission: str) -> SwarmResult:
     plan_raw = plan_response[0].content if plan_response else "{}"
 
     try:
-        plan = json.loads(plan_raw.strip().removeprefix("```json").removesuffix("```").strip())
+        plan = json.loads(
+            plan_raw.strip()
+            .removeprefix("```json")
+            .removeprefix("```")
+            .removesuffix("```")
+            .strip()
+        )
     except Exception:
-        plan = {ag["id"]: f"Analyze the mission from the {ag['role']} perspective" for ag in AGENTS}
+        plan = {
+            ag["id"]: f"Analyze the mission from the {ag['role']} perspective"
+            for ag in AGENTS
+        }
 
     # ── Step 2: All 6 agents run in parallel ──────────────────────────────────
     tasks = [
@@ -240,14 +258,27 @@ async def orchestrate_swarm(mission: str) -> SwarmResult:
 
     try:
         synth = json.loads(
-            synth_raw.strip().removeprefix("```json").removesuffix("```").strip()
+            synth_raw.strip()
+            .removeprefix("```json")
+            .removeprefix("```")
+            .removesuffix("```")
+            .strip()
         )
     except Exception:
         synth = {
             "solution_title": "AI Agent Swarm Solution",
             "executive_summary": "A multi-agent system that coordinates specialist AI agents.",
-            "key_innovations": ["Parallel agent execution", "Typed agent outputs", "Semantic Kernel orchestration"],
-            "tech_stack": ["Azure OpenAI", "Semantic Kernel", "Azure Container Apps", "FastAPI"],
+            "key_innovations": [
+                "Parallel agent execution",
+                "Typed agent outputs",
+                "Semantic Kernel orchestration",
+            ],
+            "tech_stack": [
+                "Azure OpenAI",
+                "Semantic Kernel",
+                "Azure Container Apps",
+                "FastAPI",
+            ],
             "impact": "Reduces complex technical planning from hours to under 60 seconds.",
             "ms_alignment": "Built entirely on Azure AI Foundry and Semantic Kernel.",
         }
@@ -280,4 +311,25 @@ async def run_swarm(req: MissionRequest):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "SwarmMind Orchestrator"}
+    """Health check — also validates all required env vars are present."""
+    missing = [
+        v for v in [
+            "AZURE_OPENAI_API_KEY",
+            "AZURE_OPENAI_ENDPOINT",
+            "AZURE_OPENAI_API_VERSION",
+            "AZURE_OPENAI_DEPLOYMENT",
+        ]
+        if not os.environ.get(v)
+    ]
+    if missing:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Missing environment variables: {', '.join(missing)}"
+        )
+    return {
+        "status": "ok",
+        "service": "SwarmMind Orchestrator",
+        "deployment": os.environ.get("AZURE_OPENAI_DEPLOYMENT"),
+        "endpoint": os.environ.get("AZURE_OPENAI_ENDPOINT"),
+        "api_version": os.environ.get("AZURE_OPENAI_API_VERSION"),
+    }
