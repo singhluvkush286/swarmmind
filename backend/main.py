@@ -11,12 +11,12 @@ import json
 import time
 from typing import Optional
 
-from dotenv import load_dotenv          # ← NEW: load .env locally
-load_dotenv()                           # ← NEW: must be before any os.environ access
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import semantic_kernel as sk
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.contents.chat_history import ChatHistory
@@ -25,11 +25,7 @@ app = FastAPI(title="SwarmMind Orchestration API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "https://*.azurecontainerapps.io",
-    ],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -43,7 +39,7 @@ def create_kernel() -> sk.Kernel:
             deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT"],
             endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
             api_key=os.environ["AZURE_OPENAI_API_KEY"],
-            api_version=os.environ["AZURE_OPENAI_API_VERSION"],  # ← NEW: required
+            api_version=os.environ["AZURE_OPENAI_API_VERSION"],
         )
     )
     return kernel
@@ -133,13 +129,20 @@ class MissionRequest(BaseModel):
 
 
 class AgentResult(BaseModel):
-    agent_id: str
+    # Keep stable field names for the frontend (which uses `agentResults`).
+    # Use explicit JSON key via alias instead of relying on `serialization_alias`.
+    agent_id: str = Field(..., alias="agent")
     name: str
     role: str
     icon: str
     task: str
     output: str
     duration_ms: int
+
+    model_config = {
+        "populate_by_name": True,
+        "from_attributes": True,
+    }
 
 
 class SwarmResult(BaseModel):
@@ -150,14 +153,16 @@ class SwarmResult(BaseModel):
     tech_stack: list[str]
     impact: str
     ms_alignment: str
-    agent_results: list[AgentResult]
+    agent_results: list[AgentResult] = Field(..., alias="agentResults")
     total_duration_ms: int
     agent_count: int
+
+    class Config:
+        populate_by_name = True
 
 
 # ── Core orchestration logic ─────────────────────────────────────────────────
 async def run_agent(kernel: sk.Kernel, agent: dict, task: str) -> AgentResult:
-    """Run a single specialist agent using Semantic Kernel chat completion."""
     start = time.time()
 
     history = ChatHistory()
@@ -188,16 +193,15 @@ async def run_agent(kernel: sk.Kernel, agent: dict, task: str) -> AgentResult:
 
 
 async def orchestrate_swarm(mission: str) -> SwarmResult:
-    """Main orchestration: plan → parallel agents → synthesize."""
     total_start = time.time()
     kernel = create_kernel()
 
-    # ── Step 1: Orchestrator decomposes mission into per-agent tasks ──────────
+    # ── Step 1: Decompose ────────────────────────────────────────────────────
     plan_history = ChatHistory()
     plan_history.add_system_message(
         "You are a SwarmMind Orchestrator. Decompose the user mission into 6 "
         "specific sub-tasks for these agents: planner, researcher, analyst, coder, "
-        "critic, synthesizer. Respond ONLY with valid JSON (no markdown): "
+        "critic, synthesizer. Respond ONLY with valid JSON (no markdown block wrapper): "
         '{"planner":"...","researcher":"...","analyst":"...","coder":"...","critic":"...","synthesizer":"..."} '
         "Each value is a single precise instruction for that agent."
     )
@@ -213,43 +217,31 @@ async def orchestrate_swarm(mission: str) -> SwarmResult:
     plan_raw = plan_response[0].content if plan_response else "{}"
 
     try:
-        plan = json.loads(
-            plan_raw.strip()
-            .removeprefix("```json")
-            .removeprefix("```")
-            .removesuffix("```")
-            .strip()
-        )
+        cleaned_plan = plan_raw.strip().replace("```json", "").replace("```", "").strip()
+        plan = json.loads(cleaned_plan)
     except Exception:
-        plan = {
-            ag["id"]: f"Analyze the mission from the {ag['role']} perspective"
-            for ag in AGENTS
-        }
+        plan = {ag["id"]: f"Analyze the mission from the {ag['role']} perspective" for ag in AGENTS}
 
-    # ── Step 2: All 6 agents run in parallel ──────────────────────────────────
+    # ── Step 2: Run in Parallel ──────────────────────────────────────────────
     tasks = [
         run_agent(kernel, ag, plan.get(ag["id"], f"Analyze: {mission}"))
         for ag in AGENTS
     ]
     agent_results: list[AgentResult] = await asyncio.gather(*tasks)
 
-    # ── Step 3: Final synthesis into structured report ────────────────────────
-    combined = "\n\n".join(
-        f"[{r.role}]: {r.output}" for r in agent_results
-    )
+    # ── Step 3: Synthesis ────────────────────────────────────────────────────
+    combined = "\n\n".join(f"[{r.role}]: {r.output}" for r in agent_results)
     synth_history = ChatHistory()
     synth_history.add_system_message(
         "You are the final report synthesizer for a Microsoft AI hackathon judge. "
-        "Respond ONLY with valid JSON (no markdown): "
+        "Respond ONLY with valid JSON (no markdown block wrapper): "
         '{"solution_title":"...","executive_summary":"2-3 sentences",'
         '"key_innovations":["...","...","..."],'
         '"tech_stack":["...","...","...","..."],'
         '"impact":"1-2 sentences",'
         '"ms_alignment":"1 sentence on Azure AI / Microsoft stack alignment"}'
     )
-    synth_history.add_user_message(
-        f"Mission: {mission}\n\nAgent outputs:\n{combined}"
-    )
+    synth_history.add_user_message(f"Mission: {mission}\n\nAgent outputs:\n{combined}")
     settings.max_tokens = 600
     synth_response = await chat_service.get_chat_message_contents(
         chat_history=synth_history, settings=settings
@@ -257,28 +249,14 @@ async def orchestrate_swarm(mission: str) -> SwarmResult:
     synth_raw = synth_response[0].content if synth_response else "{}"
 
     try:
-        synth = json.loads(
-            synth_raw.strip()
-            .removeprefix("```json")
-            .removeprefix("```")
-            .removesuffix("```")
-            .strip()
-        )
+        cleaned_synth = synth_raw.strip().replace("```json", "").replace("```", "").strip()
+        synth = json.loads(cleaned_synth)
     except Exception:
         synth = {
             "solution_title": "AI Agent Swarm Solution",
             "executive_summary": "A multi-agent system that coordinates specialist AI agents.",
-            "key_innovations": [
-                "Parallel agent execution",
-                "Typed agent outputs",
-                "Semantic Kernel orchestration",
-            ],
-            "tech_stack": [
-                "Azure OpenAI",
-                "Semantic Kernel",
-                "Azure Container Apps",
-                "FastAPI",
-            ],
+            "key_innovations": ["Parallel agent execution", "Typed agent outputs", "Semantic Kernel orchestration"],
+            "tech_stack": ["Azure OpenAI", "Semantic Kernel", "FastAPI"],
             "impact": "Reduces complex technical planning from hours to under 60 seconds.",
             "ms_alignment": "Built entirely on Azure AI Foundry and Semantic Kernel.",
         }
@@ -299,7 +277,6 @@ async def orchestrate_swarm(mission: str) -> SwarmResult:
     )
 
 
-# ── API endpoints ─────────────────────────────────────────────────────────────
 @app.post("/api/swarm", response_model=SwarmResult)
 async def run_swarm(req: MissionRequest):
     if not req.mission.strip():
@@ -311,21 +288,9 @@ async def run_swarm(req: MissionRequest):
 
 @app.get("/health")
 async def health():
-    """Health check — also validates all required env vars are present."""
-    missing = [
-        v for v in [
-            "AZURE_OPENAI_API_KEY",
-            "AZURE_OPENAI_ENDPOINT",
-            "AZURE_OPENAI_API_VERSION",
-            "AZURE_OPENAI_DEPLOYMENT",
-        ]
-        if not os.environ.get(v)
-    ]
+    missing = [v for v in ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_API_VERSION", "AZURE_OPENAI_DEPLOYMENT"] if not os.environ.get(v)]
     if missing:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Missing environment variables: {', '.join(missing)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Missing environment variables: {', '.join(missing)}")
     return {
         "status": "ok",
         "service": "SwarmMind Orchestrator",

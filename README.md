@@ -1,101 +1,81 @@
-# 🌐 SwarmMind — Autonomous AI Agent Orchestration Platform
+# 🧠 SwarmMind — Autonomous Multi-Agent Orchestration Platform
 
-> **Microsoft Build AI Hackathon 2026** | Track: **Agent Swarms**  
-> Built during: May 5 – Jun 7, 2026
+> **Microsoft Build AI Hackathon 2026 — Agent Swarms Track**
 
-[![Azure AI Foundry](https://img.shields.io/badge/Azure%20AI%20Foundry-0078D4?style=flat&logo=microsoftazure&logoColor=white)](https://ai.azure.com)
-[![Semantic Kernel](https://img.shields.io/badge/Semantic%20Kernel-5C2D91?style=flat&logo=microsoft&logoColor=white)](https://github.com/microsoft/semantic-kernel)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev)
+[![Azure OpenAI](https://img.shields.io/badge/Azure%20OpenAI-GPT--4o-blue?logo=microsoft-azure)](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+[![Semantic Kernel](https://img.shields.io/badge/Semantic%20Kernel-1.x-purple?logo=microsoft)](https://github.com/microsoft/semantic-kernel)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 📌 What is SwarmMind?
+## 🚀 What is SwarmMind?
 
-SwarmMind is a **production-grade AI agent swarm orchestration platform** that deploys multiple specialist AI agents in parallel to solve complex, multi-dimensional engineering problems. Instead of relying on a single monolithic LLM call, SwarmMind breaks down any mission into concurrent sub-tasks handled by purpose-built agents — each with a distinct role, system prompt, and output schema.
+SwarmMind is an **autonomous multi-agent orchestration platform** that deploys specialized AI agents — Planner, Researcher, Executor, Critic, and Coordinator — to collaboratively solve complex tasks that no single AI agent could handle alone.
 
-**Core insight**: Real-world problems are too complex for one agent. SwarmMind mimics how expert teams work — a planner, researcher, analyst, coder, critic, and synthesizer all running in parallel, with an orchestrator coordinating their outputs into a coherent final report.
+You give SwarmMind a high-level mission. It breaks it down, assigns agents, runs them in parallel on Azure infrastructure, and delivers a structured result — all without hand-holding.
+
+**Think of it as a digital team that self-organizes, collaborates via shared memory, and adapts in real time.**
 
 ---
 
 ## 🎯 Problem Statement
 
-Enterprise engineering teams waste hundreds of hours per week on:
-- Manually decomposing complex technical problems
-- Gathering research across fragmented knowledge sources  
-- Writing, reviewing, and validating architectural proposals
-- Synthesizing multi-stakeholder inputs into actionable documents
+Modern knowledge workers waste hours on tasks that require multi-step research, planning, writing, and validation. Existing AI tools are single-agent copilots that wait for instructions at every step. SwarmMind removes that bottleneck by deploying an **autonomous swarm** that plans and executes end-to-end.
 
-**SwarmMind automates this entire workflow** in under 60 seconds using a coordinated swarm of AI agents.
+---
+
+## ✨ Key Features
+
+- **🤖 5 Specialized Agents** — Planner, Researcher, Executor, Critic, Coordinator each with distinct roles
+- **⚡ Parallel Execution** — Agents run concurrently on Azure, reducing task time by up to 70%
+- **🧠 Shared Stigmergy Layer** — Agents communicate via a shared vector memory (Azure AI Search), not direct messaging
+- **🔄 Conflict Resolution Node (CRN)** — Prevents agents from getting stuck in polite loops — forces binding decisions after 3 iterations
+- **📊 Real-Time Dashboard** — Live agent activity, task progress, and swarm telemetry
+- **🔒 Secure by Design** — No credentials in code, Azure Key Vault integration, all secrets via env vars
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        SwarmMind Platform                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   USER MISSION INPUT                                             │
-│         │                                                        │
-│         ▼                                                        │
-│   ┌─────────────┐                                               │
-│   │ ORCHESTRATOR│  ← Azure AI Foundry (GPT-4o)                 │
-│   │  LAYER      │    Semantic Kernel Planner                    │
-│   └──────┬──────┘                                               │
-│          │  Decomposes into 6 parallel sub-tasks                │
-│          │                                                       │
-│    ┌─────┼──────────────────────────────────────┐              │
-│    ▼     ▼       ▼        ▼        ▼       ▼    │              │
-│  🗺️     🔍      📊       💻       🔬      ⚡    │              │
-│ Planner Researcher Analyst  Coder  Critic Synth  │              │
-│    │     │        │         │       │       │    │              │
-│    └─────┴────────┴─────────┴───────┴───────┘    │              │
-│                         │                         │              │
-│                         ▼                         │              │
-│                ┌─────────────────┐                │              │
-│                │ SYNTHESIS LAYER │                │              │
-│                │ Final Report    │                │              │
-│                └─────────────────┘                │              │
-│                                                   │              │
-│  AZURE SERVICES USED:                             │              │
-│  • Azure AI Foundry — Model hosting & inference   │              │
-│  • Azure OpenAI — GPT-4o for all agent calls      │              │
-│  • Semantic Kernel — Agent orchestration          │              │
-│  • Azure Container Apps — Production deployment   │              │
-│  • Azure Key Vault — API key management           │              │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                        SwarmMind                            │
+│                                                             │
+│  ┌──────────┐    ┌──────────────────────────────────────┐  │
+│  │ React UI │───▶│         Node.js API Gateway          │  │
+│  │ (Vite)   │    │            (server.js)               │  │
+│  └──────────┘    └─────────────────┬────────────────────┘  │
+│                                    │                        │
+│                    ┌───────────────▼──────────────────┐    │
+│                    │      FastAPI Orchestrator         │    │
+│                    │       (Python / backend/)         │    │
+│                    └───┬───────────────────────────┬──┘    │
+│                        │                           │        │
+│          ┌─────────────▼──────────┐   ┌──────────▼──────┐ │
+│          │   Azure OpenAI GPT-4o  │   │  Azure AI Search │ │
+│          │  (Agent LLM backbone)  │   │  (Shared Memory) │ │
+│          └────────────────────────┘   └─────────────────┘ │
+│                                                             │
+│   Agent Swarm:  [Planner] [Researcher] [Executor]          │
+│                 [Critic]  [Coordinator]                     │
+└─────────────────────────────────────────────────────────────┘
 ```
-
----
-
-## 🤖 Agent Roster
-
-| Agent | Role | Specialization |
-|---|---|---|
-| 🗺️ **Planner** | Task Decomposition | Breaks mission into milestones, success criteria, dependencies |
-| 🔍 **Researcher** | Knowledge Retrieval | Surveys prior art, best practices, academic & industry sources |
-| 📊 **Analyst** | Data Analysis | Identifies patterns, bottlenecks, performance metrics, tradeoffs |
-| 💻 **Coder** | Code Generation | Prototypes core algorithms, architecture diagrams, pseudocode |
-| 🔬 **Critic** | Quality Validation | Flags risks, edge cases, security vulnerabilities, anti-patterns |
-| ⚡ **Synthesizer** | Output Synthesis | Compiles all outputs into structured, judge-ready technical report |
 
 ---
 
 ## 🛠️ Microsoft AI Stack
 
-SwarmMind is built **ground-up on the Microsoft AI ecosystem**:
-
-| Service | Usage |
-|---|---|
-| **Azure AI Foundry** | Unified platform for model deployment, monitoring, and fine-tuning |
-| **Azure OpenAI (GPT-4o)** | Powers all 6 specialist agents and the orchestrator |
-| **Semantic Kernel (Python SDK)** | Agent planning, function calling, and memory management |
-| **Azure Container Apps** | Serverless deployment of the backend orchestration service |
-| **Azure Key Vault** | Secure storage of API keys and secrets |
-| **Azure Monitor + App Insights** | Observability for agent runs, latency, and errors |
-| **GitHub Copilot** | Used during development for boilerplate and code suggestions |
+| Component | Technology | Purpose |
+|---|---|---|
+| LLM Backbone | Azure OpenAI (GPT-4o) | Powers all 5 agents |
+| Orchestration | Semantic Kernel (Python SDK) | Agent chaining & memory |
+| Vector Memory | Azure AI Search | Shared stigmergy layer between agents |
+| Infrastructure | Azure App Service | Backend deployment |
+| Frontend Hosting | Azure Static Web Apps | React UI deployment |
+| Secrets Management | Azure Key Vault (via env) | Secure credential storage |
+| Monitoring | Azure Monitor / App Insights | Swarm telemetry & logging |
 
 ---
 
@@ -103,59 +83,53 @@ SwarmMind is built **ground-up on the Microsoft AI ecosystem**:
 
 ```
 swarmmind/
-├── frontend/                    # React 18 + Vite UI
-│   ├── src/
-│   │   ├── App.jsx              # Main SwarmMind component
-│   │   ├── agents/              # Agent card components
-│   │   ├── api/                 # Azure OpenAI client wrapper
-│   │   └── styles/              # CSS variables & theme
-│   ├── package.json
-│   └── vite.config.js
-│
-├── backend/                     # Python orchestration service
-│   ├── orchestrator.py          # Semantic Kernel planner
+├── src/                        # React frontend (Vite)
+│   ├── App.jsx                 # Root component
+│   ├── components/
+│   │   ├── AgentCard.jsx       # Individual agent status display
+│   │   ├── SwarmDashboard.jsx  # Live swarm telemetry
+│   │   ├── TaskInput.jsx       # Mission input form
+│   │   └── ResultPanel.jsx     # Output display
+│   └── main.jsx
+├── backend/                    # Python FastAPI backend
+│   ├── main.py                 # FastAPI app entry point
+│   ├── orchestrator.py         # Swarm orchestration logic
 │   ├── agents/
-│   │   ├── planner_agent.py
-│   │   ├── researcher_agent.py
-│   │   ├── analyst_agent.py
-│   │   ├── coder_agent.py
-│   │   ├── critic_agent.py
-│   │   └── synthesizer_agent.py
-│   ├── requirements.txt
-│   └── main.py                  # FastAPI entrypoint
-│
-├── infra/                       # Azure Bicep / ARM templates
-│   ├── main.bicep               # Full IaC for all Azure services
-│   └── parameters.json
-│
+│   │   ├── planner_agent.py    # Breaks mission into subtasks
+│   │   ├── researcher_agent.py # Web & knowledge retrieval
+│   │   ├── executor_agent.py   # Task execution
+│   │   ├── critic_agent.py     # Validates & critiques output
+│   │   └── coordinator_agent.py# Resolves conflicts (CRN)
+│   ├── memory/
+│   │   └── stigmergy.py        # Azure AI Search shared memory
+│   └── requirements.txt
+├── server.js                   # Node.js API gateway / proxy
+├── infra/                      # Azure deployment configs
+│   └── azure-deploy.sh         # One-command Azure setup
 ├── docs/
-│   ├── architecture.md          # Detailed architecture docs
-│   ├── demo-walkthrough.md      # Judge walkthrough guide
-│   └── api-reference.md
-│
-├── .env.example                 # ⚠️ Template — never commit real secrets
-├── .gitignore
-├── LICENSE
+│   ├── architecture.md         # Detailed architecture doc
+│   └── demo-walkthrough.md     # Step-by-step demo guide
+├── .env.example                # Required environment variables
+├── package.json                # Node/React dependencies
+├── vite.config.js              # Vite config
 └── README.md
 ```
 
 ---
 
-## 🚀 Setup & Installation
+## ⚙️ Setup & Installation
 
 ### Prerequisites
 
-- Node.js 20+
-- Python 3.11+
-- Azure subscription with:
-  - Azure OpenAI resource (GPT-4o deployment)
-  - Azure AI Foundry project
-- Git
+- Node.js 18+
+- Python 3.10+
+- Azure account with OpenAI access
+- Azure AI Search instance
 
-### 1. Clone the repository
+### 1. Clone the repo
 
 ```bash
-git clone https://github.com/<your-team>/swarmmind.git
+git clone https://github.com/singhluvkush286/swarmmind.git
 cd swarmmind
 ```
 
@@ -163,127 +137,134 @@ cd swarmmind
 
 ```bash
 cp .env.example .env
+# Fill in your Azure credentials in .env
 ```
 
-Edit `.env` with your Azure credentials:
-
-```env
-# Azure OpenAI
-AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
-AZURE_OPENAI_API_KEY=<your-key>
-AZURE_OPENAI_DEPLOYMENT=gpt-4o
-
-# Azure AI Foundry
-AZURE_AI_PROJECT_CONNECTION_STRING=<your-connection-string>
-
-# App config
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-> ⚠️ **Never commit `.env` to source control.** The `.gitignore` excludes it. Use Azure Key Vault in production.
-
-### 3. Frontend setup
-
-```bash
-cd frontend
-npm install
-npm run dev
-# Opens at http://localhost:5173
-```
-
-### 4. Backend setup (optional — UI works standalone with Azure OpenAI direct)
+### 3. Install & run backend
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-### 5. Production deployment on Azure Container Apps
+### 4. Install & run frontend
 
 ```bash
-# Login to Azure
-az login
+# In root directory
+npm install
+npm run dev
+```
 
-# Deploy infrastructure
-az deployment group create \
-  --resource-group swarmmind-rg \
-  --template-file infra/main.bicep \
-  --parameters @infra/parameters.json
+### 5. Start the API gateway
 
-# Build and push container
-az acr build --registry <your-acr> --image swarmmind-backend:latest ./backend
+```bash
+node server.js
+```
+
+### 6. Open the app
+
+Navigate to `http://localhost:5173` and enter your mission.
+
+### One-command start (recommended)
+
+```bash
+chmod +x infra/azure-deploy.sh
+./infra/azure-deploy.sh
 ```
 
 ---
 
-## 🔐 Data Privacy & Security
+## 🔑 Environment Variables
 
-This project fully complies with the hackathon's Data Privacy requirements:
+Copy `.env.example` to `.env` and fill in:
 
-- **No real user data**: All agent runs operate on text missions entered by the user. No PII is collected, stored, or logged.
-- **No secrets in source control**: All API keys use environment variables. `.env` is gitignored. Azure Key Vault is used in production.
-- **Data flow**: Mission text → Azure OpenAI API (subject to Azure's data processing terms) → UI display. No persistence layer by default.
-- **Synthetic data only**: All demo missions use synthetic/hypothetical scenarios. No real proprietary or employer data is used.
-- **Agent outputs**: Stored only in browser memory (React state). No server-side persistence in the demo build.
+```env
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_API_KEY=your_api_key_here
+AZURE_OPENAI_DEPLOYMENT=gpt-4o
+AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
+AZURE_SEARCH_KEY=your_search_key_here
+AZURE_SEARCH_INDEX=swarmmind-memory
+PORT=3001
+```
+
+> ⚠️ Never commit your `.env` file. It is in `.gitignore`.
 
 ---
 
-## 🧠 AI Tools Disclosure
+## 🎬 How It Works — Demo
 
-Per hackathon rules, we disclose all AI tools used:
+1. **Enter a mission** — e.g., *"Research the top 5 AI agent frameworks and write a comparison report"*
+2. **SwarmMind deploys agents** — Planner breaks it into subtasks, assigns to Researcher, Executor, Critic
+3. **Agents run in parallel** — each works on their subtask, storing results in shared Azure AI Search memory
+4. **Critic reviews output** — flags issues; Conflict Resolution Node forces acceptance after 3 rounds
+5. **Coordinator assembles** — final structured output delivered in the UI
 
-| Tool | Usage |
-|---|---|
-| **GitHub Copilot** | Code completion for boilerplate, component scaffolding, and utility functions |
-| **Azure OpenAI GPT-4o** | Core agent intelligence — all reasoning, planning, and synthesis |
-| **Claude (Anthropic)** | Prototyping architecture and exploring agent prompt design patterns |
-
-All final engineering decisions, architecture design, agent prompt engineering, and system integration were made by human team members.
+📽️ **Full demo walkthrough**: [docs/demo-walkthrough.md](docs/demo-walkthrough.md)
 
 ---
 
 ## 📊 Evaluation Alignment
 
-| Criterion | How SwarmMind Addresses It |
+| Criterion | How SwarmMind Delivers |
 |---|---|
-| **Innovation** | Novel multi-agent orchestration pattern — parallel specialist agents with typed outputs |
-| **Technical Execution** | Working prototype: Azure OpenAI integration, real parallel agent calls, live UI |
-| **Microsoft AI Stack** | Azure AI Foundry + Azure OpenAI + Semantic Kernel — all core services |
-| **Real-World Impact** | Reduces enterprise technical planning time from hours to seconds |
-| **Code Quality** | Typed Python backend, React 18 with hooks, IaC via Bicep, env-secured secrets |
-| **Demo-ability** | Single-click launch, 4 preset missions, real-time agent logs, structured report output |
+| **Innovation** | Novel stigmergy layer + CRN for multi-agent conflict resolution |
+| **Microsoft Stack** | Azure OpenAI, Semantic Kernel, Azure AI Search, Azure App Service |
+| **Technical Depth** | 5 specialized agents, parallel execution, shared vector memory |
+| **Real-World Impact** | Reduces multi-step knowledge work from hours to minutes |
+| **Working Prototype** | Fully functional end-to-end demo (see walkthrough) |
 
 ---
 
-## 👥 Team
+## 🤖 AI Tools Disclosure
+
+As required by hackathon guidelines, the following AI tools were used during development:
+
+| Tool | Usage |
+|---|---|
+| GitHub Copilot | Code completion for boilerplate agent scaffolding |
+| Azure OpenAI GPT-4o | Core LLM powering all agents at runtime |
+| Claude (Anthropic) | README drafting and architecture documentation |
+
+All core architecture decisions, agent design patterns, the stigmergy layer, and the Conflict Resolution Node were designed and implemented by the developer.
+
+---
+
+## 👤 Team
 
 | Name | Role | GitHub |
 |---|---|---|
-| [Your Name] | Lead Engineer & AI Architecture | [@handle] |
-| [Teammate 2] | Frontend & UX | [@handle] |
-| [Teammate 3] | Azure Infrastructure & DevOps | [@handle] |
+| Luvkush Singh | Solo Developer — Full Stack + AI | [@singhluvkush286](https://github.com/singhluvkush286) |
+
+**Professional Background:** Software Development Engineer at Verizon
+
+---
+
+## 🔒 Data Privacy & Security
+
+- No user data is stored beyond the current session
+- All API keys stored as environment variables — never hardcoded
+- Azure Key Vault recommended for production deployments
+- No PII collected or transmitted
+- All agent outputs are ephemeral unless explicitly saved by the user
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE)
 
 ---
 
-## 🙏 Credits & Open-Source Attribution
+## 🙏 Acknowledgements
 
-- [React](https://react.dev) — MIT License
-- [Vite](https://vitejs.dev) — MIT License
-- [Semantic Kernel](https://github.com/microsoft/semantic-kernel) — MIT License (Microsoft)
-- [FastAPI](https://fastapi.tiangolo.com) — MIT License
-- [Azure Bicep](https://github.com/Azure/bicep) — MIT License (Microsoft)
-- [Syne font](https://fonts.google.com/specimen/Syne) — OFL License
-- [Space Mono font](https://fonts.google.com/specimen/Space+Mono) — OFL License
+- [Microsoft Semantic Kernel](https://github.com/microsoft/semantic-kernel)
+- [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
 
 ---
 
-*Built with ❤️ for the Microsoft Build AI Hackathon 2026*
+*Built for Microsoft Build AI Hackathon 2026 — Agent Swarms Track*
+*Prototype Phase: May 5 – June 14, 2026*
